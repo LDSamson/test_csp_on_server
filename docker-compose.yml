@@ -18,3 +18,14 @@ services:
     depends_on:
       - shiny_app
     restart: always
+  csp_listener:
+    # Use a build context pointing to the listener Dockerfile
+    build:
+      context: ./listener # Build from the 'listener' directory
+      dockerfile: Dockerfile
+    container_name: csp_listener_container
+    expose:
+      - "5000" # Expose the listener port internally\
+    ports:
+      - "5000:5000" # Map host port 5000 to container port 5000
+    restart: always
