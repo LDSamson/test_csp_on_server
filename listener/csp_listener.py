@@ -1,7 +1,7 @@
 # listener/csp_listener.py
 
 from flask import Flask, request, jsonify
-import json # Import the json module for manual parsing if needed later
+import json # Import the json module
 
 # Create a Flask application instance
 app = Flask(__name__)
@@ -12,34 +12,39 @@ app = Flask(__name__)
 def receive_csp_report():
     """
     Receives CSP violation reports sent via POST requests.
-    Prints the report body to the console and returns a 200 OK response.
+    Attempts to parse the body as JSON and prints it to the console.
+    Returns a 200 OK response.
     """
     # Check if the request has a body
     if request.data:
-        # *** MODIFIED: Accept 'application/csp-report' mimetype for JSON parsing ***
-        # Browsers send CSP reports with Content-Type: application/csp-report
-        # We tell Flask's get_json to accept this mimetype.
-        report_data = request.get_json(force=True, silent=True, cache=False, mimetype='application/csp-report')
+        try:
+            # Decode the raw request data (expected to be UTF-8 JSON)
+            decoded_data = request.data.decode('utf-8', errors='ignore')
 
-        if report_data is not None:
-            # If parsing was successful (either application/json or application/csp-report)
-            print("\n--- Received CSP Violation Report ---")
-            # Use ensure_ascii=False to handle non-ASCII characters correctly
-            # Use indent for pretty printing
+            # Attempt to parse the decoded data as JSON
+            report_data = json.loads(decoded_data)
+
+            # If parsing was successful, print the formatted report
+            print("\n--- Received and Parsed CSP Violation Report ---")
+            # Use json.dumps for pretty printing with indent and ensure_ascii=False
             print(json.dumps(report_data, indent=4, ensure_ascii=False))
-            print("-------------------------------------")
-        else:
-            # If get_json failed, it might be a non-JSON body or another issue
-            print(f"\n--- Received Non-JSON or Unparsable CSP Report Body ---")
-            try:
-                # Attempt to decode and print the raw body
-                print(request.data.decode('utf-8', errors='ignore'))
-            except Exception as e:
-                print(f"Could not decode request data: {e}")
-            print("-----------------------------------------------------")
+            print("----------------------------------------------")
+
+        except json.JSONDecodeError as e:
+            # Handle cases where the body is not valid JSON
+            print(f"\n--- Received Data but JSON Parsing Failed ---")
+            print(decoded_data) # Print raw decoded data
+            print(f"JSON Decode Error: {e}")
+            print("---------------------------------------------")
+        except Exception as e:
+            # Catch any other unexpected errors during processing
+            print(f"\n--- An Unexpected Error Occurred ---")
+            print(decoded_data) # Print raw decoded data
+            print(f"Error: {e}")
+            print("------------------------------------")
 
     else:
-        # Handle requests with no body
+        # Handle requests with no body (shouldn't happen for CSP reports, but good practice)
         print("\n--- Received POST request with no body ---")
         print("------------------------------------------")
 
