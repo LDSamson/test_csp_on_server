@@ -13,8 +13,6 @@ services:
     volumes:
       - ./shinyproxy/application.yml:/opt/shinyproxy/application.yml:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    ports:
-      - "8080:8080"
       - ./shinyproxy/templates:/opt/shinyproxy/templates
     depends_on:
       - shiny_app
