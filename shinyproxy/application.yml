@@ -1,0 +1,20 @@
+# Basic ShinyProxy configuration
+proxy:
+  title: "Test ShinyProxy"
+  port: 8080
+  authentication: simple
+  docker:
+    internal-networking: true
+    container-network: test_server_default
+  users:
+  - name: user
+    password: password
+    groups: [admin, medical_monitor]
+  specs:
+  - id: clinsight_test
+    description: "A simple Shiny application."
+    container-image: ${CLINSIGHT_IMAGE}
+    container-network: test_server_default
+ 
+server:
+  forward-headers-strategy: native

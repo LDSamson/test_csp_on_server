@@ -4,22 +4,39 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: shiny_app_container
-    expose:
-      - "3838"
+    
+    image: clinsight_image
+  
+  shinyproxy:
+    image: openanalytics/shinyproxy:latest
+    container_name: shinyproxy_container
+    volumes:
+      - ./shinyproxy/application.yml:/opt/shinyproxy/application.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - "8080:8080"
+    depends_on:
+      - shiny_app
+    restart: always
+    environment:
+      CLINSIGHT_IMAGE: clinsight_image 
+    group_add:
+      - 1001
+  
   nginx:
     image: nginx:latest
     container_name: nginx_proxy_container
     volumes:
-      # Mount our custom nginx config into the default nginx config directory
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
     ports:
       # Map host port 8080 to nginx container port 80
-      - "8080:80"
+      - "80:80"
     depends_on:
       - shiny_app
+      - csp_listener
     restart: always
+  
   csp_listener:
-    # Use a build context pointing to the listener Dockerfile
     build:
       context: ./listener # Build from the 'listener' directory
       dockerfile: Dockerfile
