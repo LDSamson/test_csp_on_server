@@ -1,9 +1,28 @@
 # Dockerfile.shiny
-FROM ldsamson/clinsight:latest
+FROM rocker/verse:4.4.1
 
-# Copy the app directory into the image
-COPY app/ /home/appuser/
+RUN apt-get update && apt-get install -y --no-install-recommends \
+	libx11-dev \
+	libcurl4-openssl-dev \
+	libssl-dev \
+	zlib1g-dev \
+	pandoc \
+	libicu-dev \
+    && rm -rf /var/lib/apt/lists/*
 
+RUN R -e \ 
+		'options(repos = "https://packagemanager.posit.co/cran/__linux__/jammy/2024-09-17"); install.packages("remotes");\
+		remotes::install_github("openpharma/clinsight", ref = "dev")'	
+
+RUN tlmgr update --all --self && \
+  tlmgr install kvoptions ltxcmds kvsetkeys etoolbox xcolor \
+  geometry booktabs mdwtools pdftexcmds infwarerr epstopdf-pkg \
+  amsmath latex-amsmath-dev texlive-scripts auxhook bigintcalc \
+  bitset etexcmds gettitlestring hycolor hyperref intcalc kvdefinekeys \
+  letltxmacro pdfescape refcount rerunfilecheck stringenc uniquecounter \ 
+  zapfding ec multirow wrapfig float pdflscape tabu varwidth threeparttable \
+  environ trimspaces ulem
+  
 # Expose the port Shiny Server runs on (default is 3838)
 EXPOSE 3838
 
