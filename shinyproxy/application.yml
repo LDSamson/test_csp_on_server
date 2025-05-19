@@ -5,7 +5,7 @@ proxy:
   authentication: simple
   docker:
     internal-networking: true
-    container-network: test_server_default
+    container-network: test_csp_on_server_default
   template-path: ./templates/
   users:
   - name: user
@@ -15,7 +15,7 @@ proxy:
   - id: clinsight_test
     description: "A simple Shiny application."
     container-image: ${CLINSIGHT_IMAGE}
-    container-network: test_server_default
+    container-network: test_csp_on_server_default
  
 server:
   forward-headers-strategy: native
