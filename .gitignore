@@ -3,8 +3,8 @@
 .RData
 .Ruserdata
 .Renviron
-*.html
 *.tmp
 ~$*
 /doc/
 *.rds
+*.html
